@@ -36,13 +36,12 @@ public class SecurityConfig {
             )
 
             // 로그인 설정
-            .formLogin(login -> login 
+            .formLogin(login -> login // 아이디와 비밀번호 확인은 여기서!! -> 로그인 확인되면 세션까지 생성해줌
                 .loginPage("/api/auth/login") // 로그인 요청 url 
                 .usernameParameter("username")
                 .passwordParameter("password")
                 .permitAll()
-                // api로 로그인 요청시 추가 사항
-                
+                // api로 로그인 요청시 추가 사항            
                 // 로그인이 성공 시 -> ok (200 - 상태코드)
                 .successHandler((req, res, auth) -> res.setStatus(HttpServletResponse.SC_OK))
                 // 실패 시 -> fail -> 401 (200 외)
