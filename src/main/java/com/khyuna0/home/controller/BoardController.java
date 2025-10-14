@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -73,18 +74,43 @@ public class BoardController {
 	public ResponseEntity<?> deletePost(@PathVariable("id") Long id, Authentication auth) {
 		Optional<Board> board = boardRepository.findById(id);
 		
+		if(board.isEmpty()) { // T -> 수정할 글 존재하지 않음
+			return ResponseEntity.status(404).body("해당 게시글이 존재하지 않습니다.");
+		}
+		
 		// 권한 확인
 		if(auth == null || !auth.getName().equals(board.get().getAuthor().getUsername())) {
-			return ResponseEntity.status(403).body("해당 글에 대한 권한이 없습니다.");
+			return ResponseEntity.status(403).body("해당 글에 대한 삭제 권한이 없습니다.");
 		}
 		
+		boardRepository.deleteById(id);
+		return ResponseEntity.ok("삭제 성공");
+
+	}
+	
+	// 글 수정 (권한 설정, 본인 작성글만 수정 가능)
+	@PutMapping("/{id}") 
+	public ResponseEntity<?> editPost(@PathVariable("id") Long id, @RequestBody Board updateBoard, Authentication auth) {
+		Optional<Board> optional = boardRepository.findById(id);
 		
-		if(board.isPresent()) { // 글 조회 성공
-			boardRepository.deleteById(id);
-			return ResponseEntity.ok("삭제 성공");
-		} else { // 해당 글 조회 실패
-			return ResponseEntity.status(404).body("삭제할 게시물이 존재하지 않습니다.");
+		// 글 존재 여부 
+		if(optional.isEmpty()) { // T -> 수정할 글 존재하지 않음
+			return ResponseEntity.status(404).body("해당 게시글이 존재하지 않습니다.");
 		}
+		
+		// 권한 확인
+		if(auth == null || !auth.getName().equals(optional.get().getAuthor().getUsername())) {
+			return ResponseEntity.status(403).body("해당 글에 대한 수정 권한이 없습니다.");
+		}
+		
+		Board oldBoard = optional.get(); // 기존 게시글
+		oldBoard.setTitle(updateBoard.getTitle());
+		oldBoard.setContent(updateBoard.getContent());
+		
+		boardRepository.save(oldBoard);
+		
+		return ResponseEntity.ok(oldBoard);
+
 	}
 	
 	
