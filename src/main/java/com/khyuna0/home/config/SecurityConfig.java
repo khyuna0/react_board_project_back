@@ -4,12 +4,10 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -40,6 +38,7 @@ public class SecurityConfig {
         		.loginProcessingUrl("/api/auth/login") // 로그인 요청 url 
                 .usernameParameter("username")
                 .passwordParameter("password")
+                
                 // api로 로그인 요청시 추가 사항            
                 // 로그인이 성공 시 -> ok (200 - 상태코드)
                 .successHandler((req, res, auth) -> res.setStatus(HttpServletResponse.SC_OK))
