@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,8 +19,6 @@ import com.khyuna0.home.entity.Board;
 import com.khyuna0.home.entity.SiteUser;
 import com.khyuna0.home.repository.BoardRepository;
 import com.khyuna0.home.repository.UserRepository;
-
-import jakarta.persistence.EntityNotFoundException;
 
 @RestController
 @RequestMapping("/api/board")
@@ -68,4 +67,26 @@ public class BoardController {
 		}
 		
 	}
+	
+	// 특정 아이디 글 삭제
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> deletePost(@PathVariable("id") Long id, Authentication auth) {
+		Optional<Board> board = boardRepository.findById(id);
+		
+		// 권한 확인
+		if(auth == null || !auth.getName().equals(board.get().getAuthor().getUsername())) {
+			return ResponseEntity.status(403).body("해당 글에 대한 권한이 없습니다.");
+		}
+		
+		
+		if(board.isPresent()) { // 글 조회 성공
+			boardRepository.deleteById(id);
+			return ResponseEntity.ok("삭제 성공");
+		} else { // 해당 글 조회 실패
+			return ResponseEntity.status(404).body("삭제할 게시물이 존재하지 않습니다.");
+		}
+	}
+	
+	
+	
 }
