@@ -1,12 +1,15 @@
 package com.khyuna0.home.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.khyuna0.home.dto.BoardDto;
 import com.khyuna0.home.entity.Board;
 import com.khyuna0.home.entity.SiteUser;
 import com.khyuna0.home.repository.BoardRepository;
@@ -37,22 +41,56 @@ public class BoardController {
 		return boardRepository.findAll();
 	}
 	
+	// 게시글 작성 (validation x)
+//	@PostMapping
+//	public ResponseEntity<?> write(@RequestBody Board req, Authentication auth) {
+//		
+//		SiteUser siteUser = userRepository.findByUsername(auth.getName())
+//				.orElseThrow(()-> new UsernameNotFoundException("사용자 없음"));
+//		
+//		Board board = new Board();
+//		board.setTitle(req.getTitle());
+//		board.setContent(req.getContent());
+//		board.setAuthor(siteUser);
+//		
+//		boardRepository.save(board);
+//
+//		return ResponseEntity.ok(board);
+//	}
+	
 	// 게시글 작성
 	@PostMapping
-	public ResponseEntity<?> write(@RequestBody Board req, Authentication auth) {
+	public ResponseEntity<?> write(@RequestBody BoardDto boardDto, 
+			Authentication auth, BindingResult bindingResult) {
+		
+		// 유저의 로그인 여부 확인 
+		if (auth == null) { // 참이면 로그인되지 않은 상태 -> 권한없음
+			return ResponseEntity.status(401).body("로그인 후 글쓰기 가능합니다.");
+		}
 		
 		SiteUser siteUser = userRepository.findByUsername(auth.getName())
 				.orElseThrow(()-> new UsernameNotFoundException("사용자 없음"));
 		
+		if(bindingResult.hasErrors()) {
+			Map<String, String> errors = new HashMap<>();
+			bindingResult.getFieldErrors().forEach(
+					err -> {
+						errors.put(err.getField(), err.getDefaultMessage());
+						}
+					);
+			return ResponseEntity.badRequest().body(errors);
+		}
+		
 		Board board = new Board();
-		board.setTitle(req.getTitle());
-		board.setContent(req.getContent());
+		board.setTitle(boardDto.getTitle());
+		board.setContent(boardDto.getContent());
 		board.setAuthor(siteUser);
 		
 		boardRepository.save(board);
 
 		return ResponseEntity.ok(board);
 	}
+	
 	
 	// 특정 게시글 아이디로 글 조회
 	@GetMapping("/{id}")
