@@ -1,10 +1,12 @@
 package com.khyuna0.home.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,6 +56,19 @@ public class CommentController {
 		commentRepository.save(comment); // 작성된 comment 엔티티 db에 저장
 		
 		return ResponseEntity.ok(comment);
+	}
+	
+	// 댓글 불러오기 -> 댓글 달린 원 게시글의 id
+	@GetMapping("/{boardId}")
+	public ResponseEntity<?> getComment(@PathVariable("boardId") Long boardId ) {
+		
+		Optional<Board> opBoard = boardRepository.findById(boardId);
+		if(opBoard.isEmpty()) {
+			return ResponseEntity.status(404).body("해당 게시글이 존재하지 않습니다.");
+		}
+		List<Comment> comments = commentRepository.findByBoard(opBoard.get());
+		
+		return ResponseEntity.ok(comments);
 	}
 	
 }
