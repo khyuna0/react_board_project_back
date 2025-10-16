@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
@@ -41,6 +42,8 @@ public class Comment {
 	// 댓글이 달릴 원 게시글 id
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "board_id")
+//	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+	@JsonIgnore
 	private Board board;
 	
 }

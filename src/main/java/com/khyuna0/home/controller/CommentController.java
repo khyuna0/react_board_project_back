@@ -100,39 +100,45 @@ public class CommentController {
 		return ResponseEntity.ok(comments);
 	}
 	
-	// 댓글 수정
+	//댓글 수정
 	@PutMapping("/{commentId}")
-	public ResponseEntity<?> updateComment(@PathVariable("commentId") Long commentId, 
-			@RequestBody CommentDto commentDto, Authentication auth) {
-		// 수정할 댓글 찾아오기
+	public ResponseEntity<?> updateComment(
+			@PathVariable("commentId") Long commentId,
+			@RequestBody CommentDto commentDto,
+			Authentication auth) {
+		
+		//수정할 댓글 찾아오기
 		Comment comment = commentRepository.findById(commentId).orElseThrow();
 		
-		if (!comment.getAuthor().getUsername().equals(auth.getName())) { // 수정 권한 확인
+		if (!comment.getAuthor().getUsername().equals(auth.getName())) { //참이면 수정 권한 X
 			return ResponseEntity.status(403).body("수정 권한이 없습니다.");
 		}
 		
 		comment.setContent(commentDto.getContent());
-		commentRepository.save(comment); // 수정 완
+		commentRepository.save(comment); //수정 완료
 		
-		return ResponseEntity.ok(comment);
+		return ResponseEntity.ok(comment); //수정 완료 후 수정된 댓글 객체 반환
 	}
 	
-	// 댓글 삭제
+	//댓글 삭제
 	@DeleteMapping("/{commentId}")
-	public ResponseEntity<?> deleteComment(@PathVariable("commentId") Long commentId, Authentication auth) {
-		// 수정할 댓글 찾아오기
-		Optional<Comment> opComment = commentRepository.findById(commentId);
+	public ResponseEntity<?> deleteComment(
+			@PathVariable("commentId") Long commentId,
+			Authentication auth) {
 		
-		if(opComment.isEmpty()) {
+		Optional<Comment> _comment = commentRepository.findById(commentId);
+		if (_comment.isEmpty()) {
 			return ResponseEntity.status(404).body("삭제할 댓글이 존재하지 않습니다.");
 		}
 		
-		if (!opComment.get().getAuthor().getUsername().equals(auth.getName())) {
+		if (!_comment.get().getAuthor().getUsername().equals(auth.getName()) ) { //참->삭제권한 x
 			return ResponseEntity.status(403).body("삭제 권한이 없습니다.");
 		}
 		
-		commentRepository.deleteById(commentId);
-		
-		return ResponseEntity.ok("댓글 삭제 성공");
+		commentRepository.delete(_comment.get());
+			
+		return ResponseEntity.ok("댓글 삭제 성공!");
 	}
+	
+
 }
