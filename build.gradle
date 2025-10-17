@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.6'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'com.github.node-gradle.node' version '7.1.0'
 }
 
 group = 'com.khyuna0'
@@ -41,3 +42,39 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// ================= React frontend build ===================
+
+// node.js build
+node {
+	version = '22.19.0' // node.js version
+	download = true
+	workDir = file("${project.buildDir}/nodejs")
+   	npmWorkDir = file("${project.buildDir}/npm")
+}
+
+def frontendDir = "$projectDir/src/main/frontend"
+
+tasks.register("npmCustomInstall", com.github.gradle.node.npm.task.NpmTask) {
+   workingDir = file(frontendDir)
+   args = ["install"]
+}
+
+tasks.register("npmBuild", com.github.gradle.node.npm.task.NpmTask) {
+   dependsOn("npmInstall")
+   workingDir = file(frontendDir)
+   args = ["run", "build"]
+}
+
+tasks.register("copyFrontend", Copy) {
+   dependsOn("npmBuild")
+   from("$frontendDir/build")
+   into("$projectDir/src/main/resources/static")
+}
+
+tasks.named("processResources") {
+   dependsOn("copyFrontend")
+}
+
+
+
