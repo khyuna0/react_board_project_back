@@ -45,33 +45,38 @@ tasks.named('test') {
 
 // ================= React frontend build ===================
 
-// node.js build
+/* Node.js 빌드 설 */
 node {
-	version = '22.19.0' // node.js version
-	download = true
-	workDir = file("${project.buildDir}/nodejs")
-   	npmWorkDir = file("${project.buildDir}/npm")
+   version = '22.19.0' //Node.js 버전(현재 리액트 개발에 사용되었던 버전)
+   download = true
+      workDir = file("${project.buildDir}/nodejs")
+      npmWorkDir = file("${project.buildDir}/npm")
 }
 
+//현재 react 소스가 저장되어 있는 폴더를 변수로 선언해서 build.gradle 내에서 사용
 def frontendDir = "$projectDir/src/main/frontend"
 
+//npm install 실행 작업 정의
 tasks.register("npmCustomInstall", com.github.gradle.node.npm.task.NpmTask) {
    workingDir = file(frontendDir)
    args = ["install"]
 }
 
+//npm run build 실행 작업 정의 - npum run bulid 명령을 실행해서 React 빌드 결과물 build 폴더로 생성
 tasks.register("npmBuild", com.github.gradle.node.npm.task.NpmTask) {
-   dependsOn("npmInstall")
+   dependsOn("npmCustomInstall")
    workingDir = file(frontendDir)
    args = ["run", "build"]
 }
 
+//React 빌드 결과를 Spring Boot로 복사
 tasks.register("copyFrontend", Copy) {
    dependsOn("npmBuild")
    from("$frontendDir/build")
    into("$projectDir/src/main/resources/static")
 }
 
+//Srping boot 빌드 시 React 빌드도 함께 빌드되도록 자동 실행
 tasks.named("processResources") {
    dependsOn("copyFrontend")
 }

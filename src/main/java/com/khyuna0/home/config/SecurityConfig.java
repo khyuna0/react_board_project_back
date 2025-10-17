@@ -29,7 +29,8 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults()) // cors 활성화
             // URL 접근 권한 설정
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/board", "/api/board/**", "/api/comments", "/api/comments/**" ).permitAll()
+                .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/board", "/api/board/**", "/api/comments", "/api/comments/**", 
+                		"/", "/board", "/board/**", "/login", "/board/write", "/signup", "/index.html").permitAll()
                 .anyRequest().authenticated()
             )
 
