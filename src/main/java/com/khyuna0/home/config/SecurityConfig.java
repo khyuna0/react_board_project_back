@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @EnableWebSecurity
 public class SecurityConfig {
 
-	@Bean
+	@Bean // 깃허브 브랜치 추가 테스트
 	   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 	       http
 	           .csrf(csrf -> csrf.disable())  //새 방식 (람다 DSL)
