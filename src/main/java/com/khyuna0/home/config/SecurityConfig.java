@@ -81,6 +81,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:3000","http://localhost:8888", "http://172.30.1.37:8888" , "http://172.30.1.37:3000"));
         config.setAllowedOrigins(List.of("http://localhost:3000")); // React 개발 서버
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
